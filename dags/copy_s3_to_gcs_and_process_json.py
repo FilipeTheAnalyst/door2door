@@ -107,7 +107,7 @@ project_id = 'hallowed-name-392510'
 dag = DAG(
     'copy_s3_to_gcs_and_process_json',
     description='Copy S3 bucket to Google Cloud Storage and process JSON',
-    schedule_interval=None,
+    schedule_interval=@daily,
     start_date=datetime(2023, 1, 1),
     catchup=False
 )
