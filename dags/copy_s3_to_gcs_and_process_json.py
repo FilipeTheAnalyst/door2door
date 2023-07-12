@@ -99,9 +99,15 @@ def save_dataframe_to_bigquery(dataframe, dataset_name, project_id):
 
 # GCS bucket and file path information
 bucket_name = 'loka_data_lake_door2door'
+copy_file_path = 'raw/'
 file_path = 'raw/data/'
 dataset_name = 'door2door'
 project_id = 'hallowed-name-392510'
+
+# AWS S3 bucket and file path information
+s3_bucket_name = 'de-tech-assessment-2022'
+s3_folder_path = 'data/'
+s3_region = 'eu-west-1'
 
 # Define the DAG
 dag = DAG(
@@ -117,11 +123,11 @@ copy_s3_to_gcs_task = PythonOperator(
     task_id='copy_s3_to_gcs',
     python_callable=copy_s3_bucket_to_gcs,
     op_kwargs={
-        's3_bucket_name': 'de-tech-assessment-2022',
-        's3_folder_path': 'data/',
-        'gcs_bucket_name': 'loka_data_lake_door2door',
-        'gcs_folder_path': 'raw/',
-        'region': 'eu-west-1'
+        's3_bucket_name': s3_bucket_name,
+        's3_folder_path': s3_folder_path,
+        'gcs_bucket_name': bucket_name,
+        'gcs_folder_path': copy_file_path,
+        'region': s3_region
     },
     dag=dag
 )
