@@ -74,7 +74,7 @@ def read_json_from_gcs(bucket_name, file_path):
     merged_df = pd.concat(merged_dfs, ignore_index=True)
 
     # Change the column names if needed
-    merged_df = merged_df.rename(columns={'at': 'created_at' 'location.lat': 'location_lat', 'location.lng': 'location_lng', 'location.at': 'location_created_at'})
+    merged_df = merged_df.rename(columns={'at': 'created_at', 'location.lat': 'location_lat', 'location.lng': 'location_lng', 'location.at': 'location_created_at'})
 
     return merged_df
 
