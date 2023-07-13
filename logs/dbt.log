@@ -1,0 +1,42 @@
+[0m10:45:43.584180 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f6ec4fd6310>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f6ec7271a00>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f6ec7271700>]}
+
+
+============================== 10:45:43.591329 | baf92a98-743a-40d1-b435-67543c420ce5 ==============================
+[0m10:45:43.591329 [info ] [MainThread]: Running with dbt=1.5.2
+[0m10:45:43.592879 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'log_cache_events': 'False', 'write_json': 'True', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'debug': 'False', 'fail_fast': 'False', 'log_path': 'logs', 'profiles_dir': '/home/sonia/.dbt', 'version_check': 'True', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'static_parser': 'True', 'log_format': 'default', 'introspect': 'True', 'target_path': 'None', 'send_anonymous_usage_stats': 'True'}
+[0m10:45:43.594195 [warn ] [MainThread]: [ConfigFolderDirectory]: Unable to parse dict {'dir': PosixPath('/home/sonia/.dbt')}
+[0m10:45:43.594972 [info ] [MainThread]: Creating dbt configuration folder at 
+[0m10:47:09.270938 [debug] [MainThread]: Starter project path: /home/sonia/anaconda3/envs/loka/lib/python3.9/site-packages/dbt/include/starter_project
+[0m10:49:46.549132 [info ] [MainThread]: Profile dbt_door2door written to /home/sonia/.dbt/profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m10:49:46.551602 [info ] [MainThread]: 
+Your new dbt project "dbt_door2door" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m10:49:46.566116 [debug] [MainThread]: Command `dbt init` succeeded at 10:49:46.565765 after 242.99 seconds
+[0m10:49:46.567486 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f6ec4fd6310>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f6ec72719d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7f6ec49d41f0>]}
+[0m10:49:46.568614 [debug] [MainThread]: Flushing usage events
+[0m10:59:30.863756 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fccbf5f96d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fccbdf854f0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fccbdf85580>]}
+
+
+============================== 10:59:30.870949 | ce4b8b33-2ee6-48e1-a320-3ebc489f5191 ==============================
+[0m10:59:30.870949 [info ] [MainThread]: Running with dbt=1.5.2
+[0m10:59:30.872206 [debug] [MainThread]: running dbt with arguments {'printer_width': '80', 'indirect_selection': 'eager', 'write_json': 'True', 'log_cache_events': 'False', 'partial_parse': 'True', 'cache_selected_only': 'False', 'warn_error': 'None', 'version_check': 'True', 'profiles_dir': '/home/sonia/.dbt', 'log_path': 'logs', 'fail_fast': 'False', 'debug': 'False', 'use_colors': 'True', 'use_experimental_parser': 'False', 'no_print': 'None', 'quiet': 'False', 'warn_error_options': 'WarnErrorOptions(include=[], exclude=[])', 'static_parser': 'True', 'log_format': 'default', 'introspect': 'True', 'target_path': 'None', 'send_anonymous_usage_stats': 'True'}
+[0m10:59:30.873444 [warn ] [MainThread]: [OpenCommand]: Unable to parse dict {'open_cmd': 'xdg-open', 'profiles_dir': PosixPath('/home/sonia/.dbt')}
+[0m10:59:30.874446 [info ] [MainThread]: To view your profiles.yml file, run:
+
+ 
+[0m10:59:30.876021 [debug] [MainThread]: Command `dbt debug` succeeded at 10:59:30.875752 after 0.03 seconds
+[0m10:59:30.876824 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fccbf5f96d0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fccbdfba130>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x7fccbdfba100>]}
+[0m10:59:30.877628 [debug] [MainThread]: Flushing usage events
