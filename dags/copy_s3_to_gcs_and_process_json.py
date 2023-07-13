@@ -1,12 +1,12 @@
-from datetime import datetime
-from airflow import DAG
-from airflow.operators.python_operator import PythonOperator
 import requests
 from google.cloud import storage
 import re
 import pandas as pd
 import pandas_gbq
-from google.cloud import storage
+import pyarrow.parquet as pq
+from datetime import datetime, timedelta
+from airflow import DAG
+from airflow.operators.python_operator import PythonOperator
 
 def copy_s3_bucket_to_gcs(s3_bucket_name, s3_folder_path, gcs_bucket_name, gcs_folder_path, region):
     # Construct the S3 bucket URL
@@ -15,18 +15,23 @@ def copy_s3_bucket_to_gcs(s3_bucket_name, s3_folder_path, gcs_bucket_name, gcs_f
     # Retrieve the list of objects in the S3 folder
     response = requests.get(s3_bucket_url)
 
-    # Extract the object URLs from the response content
-    object_urls = re.findall(r'<Key>(.*?)<\/Key>', response.text)
+    # Extract the object URLs and LastModified timestamps from the response content
+    object_urls = re.findall(r'<Key>(.*?json)<\/Key>', response.text)
+    last_modified_values = re.findall(r'<LastModified>(.*?)<\/LastModified>', response.text)
 
-    # Filter object URLs for JSON files within the specified folder
-    filtered_object_urls = [
-        url for url in object_urls
-        if url.startswith(s3_folder_path) and url.endswith('.json')
-    ]
+    # Filter the object URLs based on the LastModified timestamp within the last hour
+    selected_object_urls = []
+    now = datetime.now()
+    one_hour_ago = now - timedelta(hours=1)
+    
+    for url, last_modified in zip(object_urls, last_modified_values):
+        last_modified_dt = datetime.strptime(last_modified, '%Y-%m-%dT%H:%M:%S.%fZ')
+        if last_modified_dt >= one_hour_ago and last_modified_dt <= now:
+            selected_object_urls.append(url)
 
-    # Copy each object from S3 to Google Cloud Storage
+    # Copy each selected object from S3 to Google Cloud Storage
     gcs_client = storage.Client()
-    for object_url in object_urls:
+    for object_url in selected_object_urls:
         s3_object_url = s3_bucket_url + object_url
         gcs_object_key = gcs_folder_path + object_url
 
@@ -36,7 +41,7 @@ def copy_s3_bucket_to_gcs(s3_bucket_name, s3_folder_path, gcs_bucket_name, gcs_f
         blob = gcs_bucket.blob(gcs_object_key)
         blob.upload_from_string(response.content)
 
-def read_json_from_gcs(bucket_name, file_path):
+def read_json_from_gcs(bucket_name, file_path, parquet_filename):
     # Initialize Google Cloud Storage client
     gcs_client = storage.Client()
 
@@ -76,44 +81,46 @@ def read_json_from_gcs(bucket_name, file_path):
     # Change the column names if needed
     merged_df = merged_df.rename(columns={'at': 'created_at', 'location.lat': 'location_lat', 'location.lng': 'location_lng', 'location.at': 'location_created_at'})
 
-    return merged_df
+    merged_df.to_parquet(parquet_filename, index=False)
 
-def save_dataframe_to_bigquery(dataframe, dataset_name, project_id):
+    return parquet_filename
+
+def save_parquet_to_bigquery(parquet_filename, dataset_name, project_id):
+    
     table_name = f'{dataset_name}.raw_data'
-    partition_field = 'at'  # Replace with the actual partition field name
 
-    # Convert the "at" column to datetime if it's not already in the correct format
-    if not pd.api.types.is_datetime64_any_dtype(dataframe[partition_field]):
-        dataframe[partition_field] = pd.to_datetime(dataframe[partition_field])
+    # Read the Parquet file into a Pandas DataFrame
+    parquet_table = pq.read_table(parquet_filename)
+    dataframe = parquet_table.to_pandas()
 
-    # Save the merged DataFrame to BigQuery table with partitioning
+    # Save the merged DataFrame to BigQuery table
     pandas_gbq.to_gbq(
         dataframe,
         table_name,
         project_id=project_id,
-        if_exists='replace',
-        partitioning_field=partition_field
+        if_exists='append'
     )
     
-    print(f"Saved merged DataFrame to partitioned BigQuery table: {table_name}")
+    print(f"Saved merged DataFrame to BigQuery table: {table_name}")
 
-# GCS bucket and file path information
+# S3 and GCS bucket and file path information
 bucket_name = 'loka_data_lake_door2door'
-copy_file_path = 'raw/'
+gcs_folder_path = 'raw/'
 file_path = 'raw/data/'
 dataset_name = 'door2door'
 project_id = 'hallowed-name-392510'
-
-# AWS S3 bucket and file path information
+current_date = datetime.now().strftime("%Y%m%d")
+parquet_filename = f"/home/airflow/merged_data_{current_date}.parquet"
+s3_region = 'eu-west-1'
 s3_bucket_name = 'de-tech-assessment-2022'
 s3_folder_path = 'data/'
-s3_region = 'eu-west-1'
+
 
 # Define the DAG
 dag = DAG(
     'copy_s3_to_gcs_and_process_json',
     description='Copy S3 bucket to Google Cloud Storage and process JSON',
-    schedule_interval=@daily,
+    schedule_interval='@hourly',
     start_date=datetime(2023, 1, 1),
     catchup=False
 )
@@ -126,7 +133,7 @@ copy_s3_to_gcs_task = PythonOperator(
         's3_bucket_name': s3_bucket_name,
         's3_folder_path': s3_folder_path,
         'gcs_bucket_name': bucket_name,
-        'gcs_folder_path': copy_file_path,
+        'gcs_folder_path': gcs_folder_path,
         'region': s3_region
     },
     dag=dag
@@ -135,14 +142,14 @@ copy_s3_to_gcs_task = PythonOperator(
 process_json_task = PythonOperator(
     task_id='process_json',
     python_callable=read_json_from_gcs,
-    op_kwargs={'bucket_name': bucket_name, 'file_path': file_path},
+    op_kwargs={'bucket_name': bucket_name, 'file_path': file_path, 'parquet_filename': parquet_filename},
     dag=dag
 )
 
 save_to_bigquery_task = PythonOperator(
     task_id='save_to_bigquery',
-    python_callable=save_dataframe_to_bigquery,
-    op_kwargs={'dataset_name': dataset_name, 'project_id': project_id},
+    python_callable=save_parquet_to_bigquery,
+    op_kwargs={'parquet_filename': parquet_filename, 'dataset_name': dataset_name, 'project_id': project_id},
     provide_context=True,
     dag=dag
 )
