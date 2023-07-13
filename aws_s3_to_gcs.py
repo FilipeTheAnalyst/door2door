@@ -10,13 +10,7 @@ def copy_s3_bucket_to_gcs(s3_bucket_name, s3_folder_path, gcs_bucket_name, gcs_f
     response = requests.get(s3_bucket_url)
 
     # Extract the object URLs from the response content
-    object_urls = re.findall(r'<Key>(.*?)<\/Key>', response.text)
-
-    # Filter object URLs for JSON files within the specified folder
-    filtered_object_urls = [
-        url for url in object_urls
-        if url.startswith(s3_folder_path) and url.endswith('.json')
-    ]
+    object_urls = re.findall(r'<Key>(.*?json)<\/Key>', response.text)
 
     # Copy each object from S3 to Google Cloud Storage
     gcs_client = storage.Client()
