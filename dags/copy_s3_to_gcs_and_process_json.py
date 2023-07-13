@@ -99,7 +99,7 @@ def save_parquet_to_bigquery(parquet_filename, dataset_name, project_id):
         dataframe,
         table_name,
         project_id=project_id,
-        if_exists='append'
+        if_exists='replace'
     )
     
     print(f"Saved merged DataFrame to BigQuery table: {table_name}")
