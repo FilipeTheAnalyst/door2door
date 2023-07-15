@@ -90,8 +90,6 @@ def read_json_from_gcs(bucket_name, file_path, parquet_filename):
             # Download the JSON file from GCS to a string
             json_data = blob.download_as_text()
 
-            print("Json Data: ", json_data)
-
             # Convert the JSON data to a DataFrame
             df = pd.read_json(json_data, lines=True)
 
