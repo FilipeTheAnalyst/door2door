@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: door2door
+    database: hallowed-name-392510
+    schema: door2door
+    tables:
+      - name: raw_data
