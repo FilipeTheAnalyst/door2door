@@ -1,0 +1,61 @@
+version: 2
+
+
+models:
+  - name: dim_entity
+    materialized: table
+    decription: Dimension table for entities (vehicle or operating period)
+    columns:
+      - name: entity_id
+        tests:
+          - unique
+          - not_null
+        description: Unique identifier for the entity
+      - name: entity_type
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['operating_period', 'vehicle']
+        description: Type of the entity
+        
+  - name: dim_date
+    description: "Dimension table for dates"
+    columns:
+      - name: date_id
+        description: "Surrogate key for date"
+        tests:
+          - unique
+          - not_null
+      - name: date_day
+        description: "Date value"
+        tests:
+          - not_null
+      - name: year
+        description: "Year value"
+        tests:
+          - not_null
+      - name: year_month
+        description: "Year and month value"
+        tests:
+          - not_null
+      - name: month
+        description: "Month value"
+        tests:
+          - not_null
+      - name: day
+        description: "Day value"
+        tests:
+          - not_null
+      - name: month_name
+        description: "Month name"
+        tests:
+          - not_null
+      - name: day_of_week
+        description: "Day of the week"
+        tests:
+          - not_null
+      - name: is_weekend
+        description: "Flag indicating if it's a weekend"
+        tests:
+          - not_null
+    unique_key: date_id
