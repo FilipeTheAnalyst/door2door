@@ -59,3 +59,56 @@ models:
         tests:
           - not_null
     unique_key: date_id
+
+  - name: dim_location
+    description: "Dimension table for locations"
+    columns:
+      - name: location_id
+        description: "Surrogate key for location"
+        tests:
+          - unique
+          - not_null
+      - name: location_lat
+        description: "Latitude value"
+      - name: location_lng
+        description: "Longitude value"
+    unique_key: location_id
+
+  - name: dim_organization
+    description: "Dimension table for organizations"
+    columns:
+      - name: organization_id
+        description: "Identifier for organization"
+        tests:
+          - unique
+          - not_null
+    unique_key: organization_id
+
+  - name: fct_event
+    description: "Fact table for events"
+    columns:
+      - name: event_id
+        description: "Identifier for event"
+        tests:
+          - unique
+          - not_null
+      - name: entity_id
+        description: "Identifier for entity"
+        tests:
+          - not_null
+      - name: updated_at
+        description: "Timestamp of event update"
+        tests:
+          - not_null
+      - name: location_id
+        description: "Identifier for location"
+        tests:
+          - not_null
+      - name: date_id
+        description: "Identifier for date"
+        tests:
+          - not_null
+      - name: operating_period_start
+        description: "Start of operating period"
+      - name: operating_period_finish
+        description: "Finish of operating period"
