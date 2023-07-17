@@ -1,4 +1,4 @@
 version: 2
 
 models:
-  - name: stg_sales__door2door
+  - name: stg_door2door
