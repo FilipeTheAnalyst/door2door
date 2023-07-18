@@ -42,6 +42,7 @@ def copy_s3_bucket_to_gcs(s3_bucket_name, s3_folder_path, gcs_bucket_name, gcs_f
     selected_object_urls = []
     now = datetime.now()
     one_hour_ago = now - timedelta(hours=1)
+    gcs_object_urls = []
 
     if file_exists==False:
         selected_object_urls = object_urls
@@ -56,40 +57,36 @@ def copy_s3_bucket_to_gcs(s3_bucket_name, s3_folder_path, gcs_bucket_name, gcs_f
     for object_url in selected_object_urls:
         s3_object_url = s3_bucket_url + object_url
         gcs_object_key = gcs_folder_path + object_url
+
+        gcs_object_urls.append(gcs_object_key)
         
         response = requests.get(s3_object_url)
         
         gcs_bucket = gcs_client.get_bucket(gcs_bucket_name)
         blob = gcs_bucket.blob(gcs_object_key)
         blob.upload_from_string(response.content)
+    
+    print("Copied objects list: ", gcs_object_urls)
 
-def read_json_from_gcs(bucket_name, file_path, parquet_filename):
+    return gcs_object_urls 
+
+def read_json_from_gcs(bucket_name, file_path, parquet_filename, selected_objects):
     # Initialize Google Cloud Storage client
     gcs_client = storage.Client()
 
     # Get the GCS bucket
     bucket = gcs_client.get_bucket(bucket_name)
 
-    # List all files in the specified file path
-    blobs = bucket.list_blobs(prefix=file_path)
-
-    # Get the datetime for one hour ago in the local timezone
-    one_hour_ago = datetime.now() - timedelta(hours=1)
-    one_hour_ago = one_hour_ago.replace(tzinfo=timezone.utc).astimezone()
-
     # Initialize an empty list to store the merged DataFrames
     merged_dfs = []
 
-    # Iterate over each JSON file
-    for blob in blobs:
-        # Get the last modified timestamp of the file
-        last_modified = blob.updated
-
-        # Check if the file was last modified during the last hour
-        if last_modified >= one_hour_ago:
+    # Iterate over each selected JSON file
+    for object_url in selected_objects:
+        blob = bucket.get_blob(object_url)
+        if blob:
             # Download the JSON file from GCS to a string
             json_data = blob.download_as_text()
-
+            
             # Convert the JSON data to a DataFrame
             df = pd.read_json(json_data, lines=True)
 
@@ -203,7 +200,7 @@ copy_s3_to_gcs_task = PythonOperator(
 process_json_task = PythonOperator(
     task_id='process_json',
     python_callable=read_json_from_gcs,
-    op_kwargs={'bucket_name': bucket_name, 'file_path': file_path, 'parquet_filename': parquet_file_path},
+    op_kwargs={'bucket_name': bucket_name, 'file_path': file_path, 'parquet_filename': parquet_file_path, 'selected_objects': copy_s3_to_gcs_task.output},
     dag=dag
 )
 
