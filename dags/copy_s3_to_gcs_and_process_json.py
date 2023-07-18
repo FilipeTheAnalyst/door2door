@@ -167,7 +167,7 @@ s3_folder_path = 'data/'
 
 # Define the DAG
 dag = DAG(
-    'copy_s3_to_gcs_and_process_json_v2',
+    'copy_s3_to_gcs_and_process_json',
     description='Copy S3 bucket to Google Cloud Storage and process JSON',
     schedule_interval='@hourly',
     start_date=datetime(2023, 1, 1),
