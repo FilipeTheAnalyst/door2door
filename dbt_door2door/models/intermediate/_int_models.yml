@@ -86,6 +86,9 @@ models:
 
   - name: fct_event
     description: "Fact table for events"
+    tests:
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: ref('stg_door2door')
     columns:
       - name: event_id
         description: "Identifier for event"

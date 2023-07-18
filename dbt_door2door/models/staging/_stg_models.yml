@@ -2,3 +2,6 @@ version: 2
 
 models:
   - name: stg_door2door
+    tests:
+      - dbt_expectations.expect_table_row_count_to_equal_other_table:
+          compare_model: source('door2door', 'raw_data')
