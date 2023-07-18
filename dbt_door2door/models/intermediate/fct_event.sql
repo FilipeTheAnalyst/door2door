@@ -1,3 +1,10 @@
+{{
+    config(
+        materialized = 'incremental',
+        on_schema_change = 'fail'
+    )
+}}
+
 with
 
 door2door as (
@@ -31,9 +38,9 @@ fct_event as
     door2door.updated_at,
     organization.organization_id,
     dim_location.location_id,
-    dim_date.date_id,
     door2door.operating_period_start,
-    door2door.operating_period_finish
+    door2door.operating_period_finish,
+    door2door.event_type
     
     from door2door
 
@@ -44,8 +51,10 @@ fct_event as
         on door2door.organization_id = organization.organization_id
 
     left join dim_location
-        on door2door.entity_location_lat = dim_location.location_lat
-        and door2door.entity_location_lng = dim_location.location_lng 
+        ON (door2door.entity_location_lat IS NULL AND door2door.entity_location_lng IS NULL
+      AND dim_location.location_lat IS NULL AND dim_location.location_lng IS NULL)
+      OR (door2door.entity_location_lat IS NOT NULL AND door2door.entity_location_lng IS NOT NULL
+          AND door2door.entity_location_lat = dim_location.location_lat AND door2door.entity_location_lng = dim_location.location_lng) 
 
     left join dim_date
         on DATE(door2door.updated_at) = DATE(dim_date.date_day)
@@ -53,4 +62,9 @@ fct_event as
 )
 
 select * from fct_event
+{% if is_incremental() %}
+
+  where updated_at > (select max(updated_at) from {{ this }})
+
+{% endif %}
 order by updated_at

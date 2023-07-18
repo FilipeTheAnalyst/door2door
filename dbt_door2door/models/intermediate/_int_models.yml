@@ -104,11 +104,13 @@ models:
         description: "Identifier for location"
         tests:
           - not_null
-      - name: date_id
-        description: "Identifier for date"
-        tests:
-          - not_null
       - name: operating_period_start
         description: "Start of operating period"
       - name: operating_period_finish
         description: "Finish of operating period"
+      - name: event_type
+        description: "Type of event"
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['create', 'register', 'deregister', 'update']
